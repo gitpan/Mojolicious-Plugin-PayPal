@@ -6,7 +6,7 @@ Mojolicious::Plugin::PayPal - Make payments using PayPal
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 DESCRIPTION
 
@@ -91,7 +91,7 @@ use Mojo::JSON 'j';
 use Mojo::UserAgent;
 use constant DEBUG => $ENV{MOJO_PAYPAL_DEBUG} || 0;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 ATTRIBUTES
 
@@ -468,6 +468,7 @@ sub _get_access_token {
   my %headers = ( 'Accept' => 'application/json', 'Accept-Language' => 'en_US' );
 
   $token_url->userinfo(join ':', $self->client_id, $self->secret);
+  warn "[MOJO_PAYPAL] Token URL $token_url\n" if DEBUG == 2;
 
   Mojo::IOLoop->delay(
     sub {
@@ -478,6 +479,7 @@ sub _get_access_token {
       my ($delay, $tx) = @_;
       my $json = eval { $tx->res->json } || {};
 
+      $json->{access_token} //= '';
       $self->$cb($self->{access_token} = $json->{access_token}, $tx);
     },
   );
@@ -498,6 +500,7 @@ sub _make_request_with_token {
       my ($delay, $token, $tx) = @_;
       return $self->$cb($tx) unless $token;
       $headers{Authorization} = "Bearer $token";
+      warn "[MOJO_PAYPAL] Authorization: Bearer $token\n" if DEBUG;
       return $self->_ua->$method($url, \%headers, $body, $delay->begin);
     },
     sub { # get token if it has expired
@@ -509,6 +512,7 @@ sub _make_request_with_token {
       my ($delay, $token, $tx) = @_;
       return $self->$cb($tx) unless $token; # return success or error $tx
       $headers{Authorization} = "Bearer $token";
+      warn "[MOJO_PAYPAL] Authorization: Bearer $token\n" if DEBUG;
       return $self->_ua->$method($url, \%headers, $body, $cb);
     },
   );
@@ -530,6 +534,10 @@ the terms of the Artistic License version 2.0.
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=head1 CONTRIBUTORS
+
+Yu Pan - C<yu.pan1005@gmail.com>
 
 =cut
 

@@ -18,9 +18,10 @@ no_index:
     - t
     - inc
 requires:
+  IO::Socket::SSL: 1.84
   Mojolicious: 5.13
 resources:
   bugtracker: https://github.com/jhthorsen/mojolicious-plugin-paypal/issues
   homepage: https://github.com/jhthorsen/mojolicious-plugin-paypal
   repository: https://github.com/jhthorsen/mojolicious-plugin-paypal.git
-version: 0.03
+version: 0.04
